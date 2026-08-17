@@ -59,27 +59,32 @@ class _ReadingScreenState extends State<ReadingScreen> {
   }
 
   void _startReading() async {
-    await _speechService.initialize();
-
     setState(() {
       _isReading = true;
       _isPaused = false;
       _secondsRead = 0;
       _capturedLiveReadText = '';
+      _wordsPerMinute = 220;
     });
 
-    // Background speech-to-text capturing live read text
-    _speechService.startListening((text) {
-      if (mounted) {
-        setState(() {
-          _capturedLiveReadText = text;
-          final wordCount = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-          if (wordCount > 0 && _secondsRead > 0) {
-            _wordsPerMinute = ((wordCount / _secondsRead) * 60).round().clamp(140, 320);
+    try {
+      final initialized = await _speechService.initialize();
+      if (initialized) {
+        _speechService.startListening((text) {
+          if (mounted) {
+            setState(() {
+              _capturedLiveReadText = text;
+              final wordCount = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+              if (wordCount > 0 && _secondsRead > 0) {
+                _wordsPerMinute = ((wordCount / _secondsRead) * 60).round().clamp(140, 320);
+              }
+            });
           }
         });
       }
-    });
+    } catch (_) {
+      // Graceful fallback if speech recognition / mic is unavailable
+    }
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted && !_isPaused) {
@@ -135,15 +140,21 @@ class _ReadingScreenState extends State<ReadingScreen> {
                         GestureDetector(
                           onTap: () async {
                             if (!_isRecordingVoiceRecap) {
-                              await _recapSpeechService.initialize();
                               setModalState(() => _isRecordingVoiceRecap = true);
-                              _recapSpeechService.startListening((text) {
-                                setModalState(() {
-                                  _userVoiceRecapText = text;
-                                });
-                              });
+                              try {
+                                final inited = await _recapSpeechService.initialize();
+                                if (inited) {
+                                  _recapSpeechService.startListening((text) {
+                                    setModalState(() {
+                                      _userVoiceRecapText = text;
+                                    });
+                                  });
+                                }
+                              } catch (_) {}
                             } else {
-                              _recapSpeechService.stopListening();
+                              try {
+                                _recapSpeechService.stopListening();
+                              } catch (_) {}
                               setModalState(() => _isRecordingVoiceRecap = false);
                             }
                           },

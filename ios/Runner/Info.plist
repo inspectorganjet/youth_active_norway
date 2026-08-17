@@ -2,9 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Разрешение камеры для AR-режима -->
+	<!-- Kamera, mikrofon og talegjenkjenning tillatelser -->
 	<key>NSCameraUsageDescription</key>
-	<string>Камера используется для AR-режима — выводит неонового боксёра в реальный мир.</string>
+	<string>Kameraet brukes til AR-visning og posisjonsanalyse under trening.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mikrofonen brukes til høytlesing og muntlig gjenfortelling i lesemodus.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Talegjenkjenning brukes til å analysere lesehastighet og gjenfortelling.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
